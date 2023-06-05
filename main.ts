@@ -1,3 +1,6 @@
+namespace SpriteKind {
+    export const tiroinimigo = SpriteKind.create()
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     meuTiro = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
@@ -16,11 +19,16 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, mySprite, 0, -48)
-    pause(500)
+        `, mySprite, 0, -50)
+    pause(200)
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function (sprite, otherSprite) {
-    sprites.destroy(tiro, effects.fire, 500)
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
+    sprites.destroy(mySprite, effects.fire, 500)
+    sprites.destroy(inimigo, effects.fire, 500)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
+    sprites.destroy(inimigo)
+    scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -29,14 +37,15 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     info.changeScoreBy(1)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(inimigo, effects.confetti, 500)
+    sprites.destroy(inimigo, effects.fire, 500)
+    scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
 })
-let posAleatoria = 0
 let tiro: Sprite = null
+let posAleatoria = 0
+let inimigo: Sprite = null
 let meuTiro: Sprite = null
 let mySprite: Sprite = null
-let inimigo: Sprite = null
 effects.starField.startScreenEffect()
 mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -181,7 +190,7 @@ scene.setBackgroundImage(img`
     3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
     `)
 info.setScore(0)
-info.setLife(5)
+info.setLife(3)
 game.onUpdateInterval(2000, function () {
     inimigo = sprites.create(img`
         . . . . . . . . . . . . . . . . 
@@ -202,8 +211,8 @@ game.onUpdateInterval(2000, function () {
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Enemy)
     posAleatoria = randint(0, scene.screenWidth())
-    inimigo.setPosition(posAleatoria, 8)
-    inimigo.setVelocity(0, 50)
+    inimigo.setPosition(posAleatoria, 80)
+    inimigo.setVelocity(0, 30)
     tiro = sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -221,9 +230,9 @@ game.onUpdateInterval(2000, function () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Projectile)
-    tiro.setVelocity(0, 60)
-    tiro.setPosition(posAleatoria, 10)
+        `, SpriteKind.tiroinimigo)
+    tiro.setVelocity(0, 50)
+    tiro.setPosition(posAleatoria, 0)
     music.play(music.stringPlayable("- - C5 - - - - - ", 120), music.PlaybackMode.UntilDone)
 })
 forever(function () {
