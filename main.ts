@@ -181,7 +181,7 @@ scene.setBackgroundImage(img`
     3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
     `)
 info.setScore(0)
-info.setLife(3)
+info.setLife(5)
 game.onUpdateInterval(2000, function () {
     inimigo = sprites.create(img`
         . . . . . . . . . . . . . . . . 
