@@ -22,6 +22,59 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         `, mySprite, 0, -50)
     pause(200)
 })
+function addEnemyNv1 () {
+    inimigo = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . f . . f . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . f f f f . . . . . . 
+        . . . . . f . . . . f . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.Enemy)
+    posAleatoria = randint(0, scene.screenWidth())
+    statusbar = statusbars.create(20, 4, StatusBarKind.Health)
+    statusbar.attachToSprite(inimigo, 5, 0)
+    inimigo.setPosition(posAleatoria, 80)
+    inimigo.setVelocity(0, 30)
+    tiro = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . f f f . f f . f . f . f f f . 
+        . . f . . f . . f f f . f . f . 
+        . . f . . f f . f . f . f f f . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.tiroinimigo)
+    tiro.setVelocity(0, 50)
+    tiro.setPosition(posAleatoria, 0)
+    music.play(music.stringPlayable("- - C5 - - - - - ", 120), music.PlaybackMode.UntilDone)
+}
+info.onScore(100, function () {
+    nível += 1
+})
+statusbars.onZero(StatusBarKind.Health, function (status) {
+    sprites.destroy(statusbar.spriteAttachedTo())
+    info.changeScoreBy(1)
+})
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
     sprites.destroy(mySprite, effects.fire, 500)
     sprites.destroy(inimigo, effects.fire, 500)
@@ -32,20 +85,23 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.tiroinimigo, function (sprite, o
     info.changeLifeBy(-1)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(meuTiro)
     sprites.destroy(inimigo)
-    info.changeScoreBy(1)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, inimigo).value += -50
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(inimigo, effects.fire, 500)
     scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
 })
+let novoTiro: Sprite = null
 let tiro: Sprite = null
+let statusbar: StatusBarSprite = null
 let posAleatoria = 0
 let inimigo: Sprite = null
 let meuTiro: Sprite = null
 let mySprite: Sprite = null
+game.showLongText("\"Aperte Espaço para atirar e use as setas para se mover\"", DialogLayout.Bottom)
+game.showLongText("\"Desvie dos projeteis e naves inimigas, você também pode destruir eles com seus foguetes\"", DialogLayout.Bottom)
 effects.starField.startScreenEffect()
 mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -191,52 +247,36 @@ scene.setBackgroundImage(img`
     `)
 info.setScore(0)
 info.setLife(3)
+let nível = 0
 game.onUpdateInterval(2000, function () {
-    inimigo = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . f . . f . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . f f f f . . . . . . 
-        . . . . . f . . . . f . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Enemy)
-    posAleatoria = randint(0, scene.screenWidth())
-    inimigo.setPosition(posAleatoria, 80)
-    inimigo.setVelocity(0, 30)
-    tiro = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . f f f . f f . f . f . f f f . 
-        . . f . . f . . f f f . f . f . 
-        . . f . . f f . f . f . f f f . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.tiroinimigo)
-    tiro.setVelocity(0, 50)
-    tiro.setPosition(posAleatoria, 0)
-    music.play(music.stringPlayable("- - C5 - - - - - ", 120), music.PlaybackMode.UntilDone)
+    addEnemyNv1()
 })
 forever(function () {
     if (info.life() == 0) {
         game.gameOver(false)
+    }
+})
+game.onUpdateInterval(500, function () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        novoTiro = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . 4 4 4 4 . . . . . . 
+            . . . . 4 4 4 4 4 4 4 4 . . . . 
+            . . . . 4 4 4 4 4 4 4 4 . . . . 
+            . . . 4 4 4 4 4 4 4 4 4 . . . . 
+            . . 4 4 4 4 4 4 4 4 4 . . . . . 
+            . . 4 4 . 4 4 4 4 4 . . . . . . 
+            . . . . 4 . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.tiroinimigo)
+        novoTiro.setPosition(value.x, value.y)
+        novoTiro.setVelocity(0, 50)
     }
 })
