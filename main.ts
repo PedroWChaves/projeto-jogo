@@ -20,6 +20,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `, mySprite, 0, -50)
+    meuTiro.setFlag(SpriteFlag.AutoDestroy, true)
     pause(200)
 })
 function addEnemyNv1 () {
@@ -66,7 +67,8 @@ function addEnemyNv1 () {
         `, SpriteKind.tiroinimigo)
     tiro.setVelocity(0, 50)
     tiro.setPosition(posAleatoria, 0)
-    music.play(music.stringPlayable("- - C5 - - - - - ", 120), music.PlaybackMode.UntilDone)
+    inimigo.setFlag(SpriteFlag.AutoDestroy, true)
+    tiro.setFlag(SpriteFlag.AutoDestroy, true)
 }
 info.onScore(100, function () {
     nível += 1
@@ -278,5 +280,6 @@ game.onUpdateInterval(500, function () {
             `, SpriteKind.tiroinimigo)
         novoTiro.setPosition(value.x, value.y)
         novoTiro.setVelocity(0, 50)
+        novoTiro.setFlag(SpriteFlag.AutoDestroy, true)
     }
 })
