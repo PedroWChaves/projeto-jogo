@@ -1,6 +1,14 @@
 namespace SpriteKind {
     export const tiroinimigo = SpriteKind.create()
 }
+sprites.onOverlap(SpriteKind.tiroinimigo, SpriteKind.Player, function (sprite, otherSprite) {
+    sprites.destroy(inimigo, effects.spray, 500)
+    scene.cameraShake(4, 500)
+    info.changeLifeBy(-1)
+    if (info.life() == 0) {
+        game.gameOver(false)
+    }
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     meuTiro = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
@@ -45,62 +53,39 @@ function addEnemyNv1 () {
     posAleatoria = randint(0, scene.screenWidth())
     statusbar = statusbars.create(20, 4, StatusBarKind.Health)
     statusbar.attachToSprite(inimigo, 5, 0)
-    inimigo.setPosition(posAleatoria, 80)
+    inimigo.setPosition(posAleatoria, 10)
     inimigo.setVelocity(0, 30)
-    tiro = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . f f f . f f . f . f . f f f . 
-        . . f . . f . . f f f . f . f . 
-        . . f . . f f . f . f . f f f . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.tiroinimigo)
-    tiro.setVelocity(0, 50)
-    tiro.setPosition(posAleatoria, 0)
     inimigo.setFlag(SpriteFlag.AutoDestroy, true)
-    tiro.setFlag(SpriteFlag.AutoDestroy, true)
 }
 info.onScore(100, function () {
-    nível += 1
+    nivel += 1
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
     sprites.destroy(statusbar.spriteAttachedTo())
     info.changeScoreBy(1)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
-    sprites.destroy(mySprite, effects.fire, 500)
-    sprites.destroy(inimigo, effects.fire, 500)
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
-    sprites.destroy(inimigo)
-    scene.cameraShake(4, 500)
-    info.changeLifeBy(-1)
+    sprites.destroy(meuTiro, effects.fire, 500)
+    sprites.destroy(tiro, effects.fire, 500)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(inimigo)
+    sprites.destroy(meuTiro, effects.fire, 500)
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, inimigo).value += -50
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(inimigo, effects.fire, 500)
     scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
+    if (info.life() == 0) {
+        game.gameOver(false)
+    }
 })
-let novoTiro: Sprite = null
 let tiro: Sprite = null
+let nivel = 0
 let statusbar: StatusBarSprite = null
 let posAleatoria = 0
-let inimigo: Sprite = null
 let meuTiro: Sprite = null
+let inimigo: Sprite = null
 let mySprite: Sprite = null
 game.showLongText("\"Aperte Espaço para atirar e use as setas para se mover\"", DialogLayout.Bottom)
 game.showLongText("\"Desvie dos projeteis e naves inimigas, você também pode destruir eles com seus foguetes\"", DialogLayout.Bottom)
@@ -249,37 +234,31 @@ scene.setBackgroundImage(img`
     `)
 info.setScore(0)
 info.setLife(3)
-let nível = 0
 game.onUpdateInterval(2000, function () {
     addEnemyNv1()
 })
-forever(function () {
-    if (info.life() == 0) {
-        game.gameOver(false)
-    }
-})
-game.onUpdateInterval(500, function () {
+game.onUpdateInterval(1000, function () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        novoTiro = sprites.create(img`
+        tiro = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            . . . . . . 4 4 4 4 . . . . . . 
-            . . . . 4 4 4 4 4 4 4 4 . . . . 
-            . . . . 4 4 4 4 4 4 4 4 . . . . 
-            . . . 4 4 4 4 4 4 4 4 4 . . . . 
-            . . 4 4 4 4 4 4 4 4 4 . . . . . 
-            . . 4 4 . 4 4 4 4 4 . . . . . . 
-            . . . . 4 . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . f f f . f f . f . f . f f f . 
+            . . f . . f . . f f f . f . f . 
+            . . f . . f f . f . f . f f f . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.tiroinimigo)
-        novoTiro.setPosition(value.x, value.y)
-        novoTiro.setVelocity(0, 50)
-        novoTiro.setFlag(SpriteFlag.AutoDestroy, true)
+        tiro.setPosition(value.x, value.y)
+        tiro.setVelocity(0, 50)
+        tiro.setFlag(SpriteFlag.AutoDestroy, true)
     }
 })
