@@ -1,14 +1,41 @@
 namespace SpriteKind {
-    export const tiroinimigo = SpriteKind.create()
+    export const TiroInimigo = SpriteKind.create()
     export const Municao = SpriteKind.create()
+    export const TiroEspecial = SpriteKind.create()
 }
-sprites.onOverlap(SpriteKind.tiroinimigo, SpriteKind.Player, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.spray, 500)
-    scene.cameraShake(4, 500)
-    info.changeLifeBy(-1)
-    if (info.life() == 0) {
-        game.gameOver(false)
+sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite, effects.fire, 500)
+})
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (numberOfAmmo.value > 0) {
+        statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, mySprite).value += -1
+        meuTiroEspecial = sprites.create(img`
+            . . . . . . c c c . . . . . . . 
+            . . . . . c a a a c . . . . . . 
+            . . . . c a a 1 a a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . . c 1 1 1 c . . . . . . 
+            . . . . . c c 1 c c . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c c c . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            `, SpriteKind.TiroEspecial)
+        meuTiroEspecial.setPosition(mySprite.x, mySprite.y)
+        meuTiroEspecial.setVelocity(0, -30)
+        meuTiroEspecial.setFlag(SpriteFlag.AutoDestroy, true)
+        pause(500)
     }
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite, effects.fire, 500)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     meuTiro = sprites.createProjectileFromSprite(img`
@@ -81,16 +108,21 @@ function addEnemyNv1 () {
     inimigo.setVelocity(0, 30)
     inimigo.setFlag(SpriteFlag.AutoDestroy, true)
 }
-info.onScore(100, function () {
-    nivel += 1
-})
 statusbars.onZero(StatusBarKind.Health, function (status) {
     sprites.destroy(status.spriteAttachedTo())
     info.changeScoreBy(1)
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    sprites.destroy(otherSprite, effects.fire, 500)
+sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.Enemy, function (sprite, otherSprite) {
+    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Municao, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    if (numberOfAmmo.value < numberOfAmmo.max) {
+        statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, sprite).value += 1
+    }
+})
+info.onScore(20, function () {
+    nivel += 1
 })
 function enemyShoot () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
@@ -111,7 +143,7 @@ function enemyShoot () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            `, SpriteKind.tiroinimigo)
+            `, SpriteKind.TiroInimigo)
         tiro.setPosition(value.x, value.y)
         tiro.setVelocity(0, 50)
         tiro.setFlag(SpriteFlag.AutoDestroy, true)
@@ -120,6 +152,14 @@ function enemyShoot () {
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+})
+sprites.onOverlap(SpriteKind.TiroInimigo, SpriteKind.Player, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.spray, 500)
+    scene.cameraShake(4, 500)
+    info.changeLifeBy(-1)
+    if (info.life() == 0) {
+        game.gameOver(false)
+    }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(otherSprite, effects.fire, 500)
@@ -136,6 +176,8 @@ let posAleatoria = 0
 let inimigo: Sprite = null
 let ammo: Sprite = null
 let meuTiro: Sprite = null
+let meuTiroEspecial: Sprite = null
+let numberOfAmmo: StatusBarSprite = null
 let mySprite: Sprite = null
 game.showLongText("\"Aperte Espaço para atirar e use as setas para se mover\"", DialogLayout.Bottom)
 game.showLongText("\"Desvie dos projeteis e naves inimigas, você também pode destruir eles com seus foguetes\"", DialogLayout.Bottom)
@@ -157,6 +199,10 @@ mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
+numberOfAmmo = statusbars.create(20, 4, StatusBarKind.Magic)
+numberOfAmmo.attachToSprite(mySprite, -5, 0)
+numberOfAmmo.value = 0
+numberOfAmmo.max = 5
 mySprite.setStayInScreen(true)
 controller.moveSprite(mySprite)
 scene.setBackgroundImage(img`
