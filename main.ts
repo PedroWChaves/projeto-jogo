@@ -2,7 +2,7 @@ namespace SpriteKind {
     export const tiroinimigo = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.tiroinimigo, SpriteKind.Player, function (sprite, otherSprite) {
-    sprites.destroy(inimigo, effects.spray, 500)
+    sprites.destroy(sprite, effects.spray, 500)
     scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
     if (info.life() == 0) {
@@ -61,19 +61,19 @@ info.onScore(100, function () {
     nivel += 1
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
-    sprites.destroy(statusbar.spriteAttachedTo())
+    sprites.destroy(status.spriteAttachedTo())
     info.changeScoreBy(1)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.tiroinimigo, function (sprite, otherSprite) {
-    sprites.destroy(meuTiro, effects.fire, 500)
-    sprites.destroy(tiro, effects.fire, 500)
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite, effects.fire, 500)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(meuTiro, effects.fire, 500)
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, inimigo).value += -50
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(inimigo, effects.fire, 500)
+    sprites.destroy(otherSprite, effects.fire, 500)
     scene.cameraShake(4, 500)
     info.changeLifeBy(-1)
     if (info.life() == 0) {
@@ -84,8 +84,8 @@ let tiro: Sprite = null
 let nivel = 0
 let statusbar: StatusBarSprite = null
 let posAleatoria = 0
-let meuTiro: Sprite = null
 let inimigo: Sprite = null
+let meuTiro: Sprite = null
 let mySprite: Sprite = null
 game.showLongText("\"Aperte Espaço para atirar e use as setas para se mover\"", DialogLayout.Bottom)
 game.showLongText("\"Desvie dos projeteis e naves inimigas, você também pode destruir eles com seus foguetes\"", DialogLayout.Bottom)
