@@ -3,8 +3,18 @@ namespace SpriteKind {
     export const Municao = SpriteKind.create()
     export const TiroEspecial = SpriteKind.create()
 }
+function enemyMove () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (value.x <= scene.screenWidth() / 2) {
+            value.setVelocity(randint(0, 50), value.vy)
+        } else {
+            value.setVelocity(randint(-50, 0), value.vy)
+        }
+    }
+}
 sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
     sprites.destroy(otherSprite, effects.fire, 500)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (numberOfAmmo.value > 0) {
@@ -30,12 +40,14 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         meuTiroEspecial.setPosition(mySprite.x, mySprite.y)
         meuTiroEspecial.setVelocity(0, -30)
         meuTiroEspecial.setFlag(SpriteFlag.AutoDestroy, true)
+        music.play(music.melodyPlayable(music.beamUp), music.PlaybackMode.UntilDone)
         pause(500)
     }
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     sprites.destroy(otherSprite, effects.fire, 500)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     meuTiro = sprites.createProjectileFromSprite(img`
@@ -105,7 +117,7 @@ function addEnemyNv1 () {
     statusbar = statusbars.create(20, 4, StatusBarKind.Health)
     statusbar.attachToSprite(inimigo, 5, 0)
     inimigo.setPosition(posAleatoria, 10)
-    inimigo.setVelocity(0, 30)
+    inimigo.setVelocity(0, 40)
     inimigo.setFlag(SpriteFlag.AutoDestroy, true)
 }
 statusbars.onZero(StatusBarKind.Health, function (status) {
@@ -114,15 +126,18 @@ statusbars.onZero(StatusBarKind.Health, function (status) {
 })
 sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.Enemy, function (sprite, otherSprite) {
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Municao, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
     if (numberOfAmmo.value < numberOfAmmo.max) {
         statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, sprite).value += 1
     }
+    music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
 })
 info.onScore(20, function () {
     nivel += 1
+    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
 })
 function enemyShoot () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
@@ -145,13 +160,14 @@ function enemyShoot () {
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.TiroInimigo)
         tiro.setPosition(value.x, value.y)
-        tiro.setVelocity(0, 50)
+        tiro.setVelocity(0, 70)
         tiro.setFlag(SpriteFlag.AutoDestroy, true)
     }
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 sprites.onOverlap(SpriteKind.TiroInimigo, SpriteKind.Player, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.spray, 500)
@@ -160,6 +176,7 @@ sprites.onOverlap(SpriteKind.TiroInimigo, SpriteKind.Player, function (sprite, o
     if (info.life() == 0) {
         game.gameOver(false)
     }
+    music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(otherSprite, effects.fire, 500)
@@ -168,9 +185,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
     if (info.life() == 0) {
         game.gameOver(false)
     }
+    music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
 })
 let tiro: Sprite = null
-let nivel = 0
 let statusbar: StatusBarSprite = null
 let posAleatoria = 0
 let inimigo: Sprite = null
@@ -330,10 +347,15 @@ scene.setBackgroundImage(img`
 effects.starField.startScreenEffect()
 info.setScore(0)
 info.setLife(3)
+let nivel = 1
+music.play(music.createSong(hex`0078000408080106001c00010a006400f401640000040000000000000000000000000000000002d80000000400012a04000800012a08000c00012510001400012a18001c00012a20002400012224002800012228002c00012530003400012938003c00012940004400012a44004800012a48004c00012250005400012260006400012268006c00012570007400012974007800012a80008400012a84008800012a88008c00012590009400012a98009c00012aa000a4000122a400a8000122a800ac000125b000b4000129b800bc000129c000c400012ac400c800012ac800cc000122d000d4000122e000e4000122e800ec000125f000f4000129f400f800012a`), music.PlaybackMode.LoopingInBackground)
 game.onUpdateInterval(2000, function () {
     addEnemyNv1()
     spawnAmmo()
 })
 game.onUpdateInterval(1000, function () {
     enemyShoot()
+    if (nivel >= 2) {
+        enemyMove()
+    }
 })
