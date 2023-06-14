@@ -4,6 +4,10 @@ namespace SpriteKind {
     export const TiroEspecial = SpriteKind.create()
     export const Enemy2 = SpriteKind.create()
     export const tiroinim2 = SpriteKind.create()
+    export const tiro = SpriteKind.create()
+}
+namespace StatusBarKind {
+    export const EnemyHealth2 = StatusBarKind.create()
 }
 function enemyMove () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
@@ -23,9 +27,11 @@ function SpawnEnemy () {
         addEnemyNv1()
         addEnemyNv2()
         spawnAmmo()
+        SpawnFood()
     } else {
         addEnemyNv1()
         spawnAmmo()
+        SpawnFood()
     }
 }
 function enemyShoot2 () {
@@ -89,11 +95,6 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         pause(500)
     }
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    sprites.destroy(otherSprite, effects.fire, 500)
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
-})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     meuTiro = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
@@ -113,8 +114,14 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . 8 a 8 . . . . . . 
         . . . . . . . . . . . . . . . . 
         `, mySprite, 0, -50)
+    meuTiro.setKind(SpriteKind.tiro)
     meuTiro.setFlag(SpriteFlag.AutoDestroy, true)
     pause(200)
+})
+sprites.onOverlap(SpriteKind.tiro, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth, inimigo).value += -1
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 function SpawnFood () {
     Gasolina = sprites.create(img`
@@ -140,8 +147,12 @@ function SpawnFood () {
     Gasolina.setFlag(SpriteFlag.AutoDestroy, true)
 }
 sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.Enemy2, function (sprite, otherSprite) {
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth2, otherSprite).value += -3
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
+statusbars.onZero(StatusBarKind.EnemyHealth2, function (status) {
+    sprites.destroy(status.spriteAttachedTo())
+    info.changeScoreBy(2)
 })
 function spawnAmmo () {
     ammo = sprites.create(img`
@@ -186,18 +197,20 @@ function addEnemyNv1 () {
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Enemy)
     posAleatoria = randint(0, scene.screenWidth())
-    statusbar = statusbars.create(20, 4, StatusBarKind.Health)
+    statusbar = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
+    statusbar.max = 1
+    statusbar.value = 1
     statusbar.attachToSprite(inimigo, 5, 0)
     inimigo.setPosition(posAleatoria, 10)
     inimigo.setVelocity(0, 40)
     inimigo.setFlag(SpriteFlag.AutoDestroy, true)
 }
-statusbars.onZero(StatusBarKind.Health, function (status) {
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
     sprites.destroy(status.spriteAttachedTo())
     info.changeScoreBy(1)
 })
 sprites.onOverlap(SpriteKind.TiroEspecial, SpriteKind.Enemy, function (sprite, otherSprite) {
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
+    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -1
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Municao, function (sprite, otherSprite) {
@@ -206,11 +219,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Municao, function (sprite, other
         statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, sprite).value += 1
     }
     music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
-})
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy2, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 function enemyMove2 () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy2)) {
@@ -229,6 +237,11 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy2, function (sprite, otherS
     }
     music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
 })
+sprites.onOverlap(SpriteKind.tiro, SpriteKind.Enemy2, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth2, otherSprite).value += -1
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
     if (statusbar2.value < statusbar2.max) {
@@ -241,7 +254,8 @@ info.onScore(20, function () {
     music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
 })
 function addEnemyNv2 () {
-    if (randint(0, 10) <= 2) {
+    pause(200)
+    if (randint(0, 10) >= 2) {
         Inimigo2 = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -260,16 +274,28 @@ function addEnemyNv2 () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.Enemy2)
-        posAleatoria = randint(0, scene.screenWidth())
-        statusbar = statusbars.create(20, 4, StatusBarKind.Health)
-        statusbar.attachToSprite(Inimigo2, 5, 0)
-        Inimigo2.setPosition(posAleatoria, 10)
+        posAleatoria2 = randint(0, scene.screenWidth())
+        statusbaren2 = statusbars.create(20, 4, StatusBarKind.EnemyHealth2)
+        statusbaren2.value = 3
+        statusbaren2.max = 3
+        statusbaren2.attachToSprite(Inimigo2, 5, 0)
+        Inimigo2.setPosition(posAleatoria2, 1)
         Inimigo2.setVelocity(0, 40)
         Inimigo2.setFlag(SpriteFlag.AutoDestroy, true)
     }
 }
+sprites.onOverlap(SpriteKind.tiro, SpriteKind.TiroInimigo, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite, effects.fire, 500)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 statusbars.onZero(StatusBarKind.Energy, function (status) {
     game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.tiro, SpriteKind.tiroinim2, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite, effects.fire, 500)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 function enemyShoot () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
@@ -296,11 +322,6 @@ function enemyShoot () {
         tiro.setFlag(SpriteFlag.AutoDestroy, true)
     }
 }
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -50
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
-})
 sprites.onOverlap(SpriteKind.TiroInimigo, SpriteKind.Player, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.spray, 500)
     scene.cameraShake(4, 500)
@@ -320,12 +341,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
     music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
 })
 let tiro: Sprite = null
+let statusbaren2: StatusBarSprite = null
+let posAleatoria2 = 0
 let Inimigo2: Sprite = null
 let statusbar: StatusBarSprite = null
 let posAleatoria = 0
-let inimigo: Sprite = null
 let ammo: Sprite = null
 let Gasolina: Sprite = null
+let inimigo: Sprite = null
 let meuTiro: Sprite = null
 let meuTiroEspecial: Sprite = null
 let tiroini2: Sprite = null
@@ -493,16 +516,14 @@ music.play(music.createSong(hex`0078000408080106001c00010a006400f401640000040000
 game.onUpdateInterval(2000, function () {
     SpawnEnemy()
 })
-game.onUpdateInterval(1000, function () {
+game.onUpdateInterval(2000, function () {
     enemyShoot()
     enemyMove()
-    SpawnFood()
     if (nivel >= 2) {
         enemyShoot()
         enemyMove()
         enemyMove2()
         enemyShoot2()
-        SpawnFood()
     }
 })
 forever(function () {
