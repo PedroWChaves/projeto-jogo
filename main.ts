@@ -678,10 +678,12 @@ game.onUpdateInterval(1000, function () {
     gasolineAmount.value += -0.05
 })
 forever(function () {
-    if (info.score() == 5) {
+    if (info.score() == 5 && level < 2) {
         level = 2
-    } else if (info.score() == 10) {
+        music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
+    } else if (info.score() >= 10 && level < 3) {
         level = 3
+        music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
     }
 })
 game.onUpdateInterval(3000, function () {
