@@ -4,59 +4,17 @@ namespace SpriteKind {
     export const SpecialAttack = SpriteKind.create()
     export const Enemy2 = SpriteKind.create()
     export const Enemy2Attack = SpriteKind.create()
-    export const tiro = SpriteKind.create()
+    export const Attack = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const EnemyHealth2 = StatusBarKind.create()
 }
 sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.Enemy, function (sprite, otherSprite) {
-    statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value += -1
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth, enemyShip).value += -1
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
-function enemyMove () {
-    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (value.x <= scene.screenWidth() / 2) {
-            value.setVelocity(randint(0, 50), value.vy)
-        } else {
-            value.setVelocity(randint(-50, 0), value.vy)
-        }
-    }
-}
-sprites.onOverlap(SpriteKind.tiro, SpriteKind.Enemy2Attack, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    sprites.destroy(otherSprite, effects.fire, 500)
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
-})
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (ammoAmount.value > 0) {
-        statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, myShip).value += -1
-        meuTiroEspecial = sprites.create(img`
-            . . . . . . c c c . . . . . . . 
-            . . . . . c a a a c . . . . . . 
-            . . . . c a a 1 a a c . . . . . 
-            . . . . c a 1 1 1 a c . . . . . 
-            . . . . c a 1 1 1 a c . . . . . 
-            . . . . c a 1 1 1 a c . . . . . 
-            . . . . . c 1 1 1 c . . . . . . 
-            . . . . . c c 1 c c . . . . . . 
-            . . . . . . c a c . . . . . . . 
-            . . . . . . c a c . . . . . . . 
-            . . . . . . c a c . . . . . . . 
-            . . . . . . c a c . . . . . . . 
-            . . . . . . c c c . . . . . . . 
-            . . . . . . . c . . . . . . . . 
-            . . . . . . . c . . . . . . . . 
-            . . . . . . . c . . . . . . . . 
-            `, SpriteKind.SpecialAttack)
-        meuTiroEspecial.setPosition(myShip.x, myShip.y)
-        meuTiroEspecial.setVelocity(0, -30)
-        meuTiroEspecial.setFlag(SpriteFlag.AutoDestroy, true)
-        music.play(music.melodyPlayable(music.beamUp), music.PlaybackMode.UntilDone)
-        pause(500)
-    }
-})
-function spawnFood () {
-    Gasolina = sprites.create(img`
+function spawnGasoline () {
+    gasoline = spawnEntity(sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . b b b b b . . . . . . 
@@ -73,21 +31,63 @@ function spawnFood () {
         . . . b 3 3 3 3 3 3 3 b . . . . 
         . . . . b b b b b b b . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Food)
-    Gasolina.setPosition(randint(0, scene.screenWidth()), 10)
-    Gasolina.setVelocity(0, 80)
-    Gasolina.setFlag(SpriteFlag.AutoDestroy, true)
+        `, SpriteKind.Food), 80)
 }
+sprites.onOverlap(SpriteKind.Attack, SpriteKind.Enemy2Attack, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
+function enemyMove () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (value.x <= scene.screenWidth() / 2) {
+            value.setVelocity(randint(0, 50), value.vy)
+        } else {
+            value.setVelocity(randint(-50, 0), value.vy)
+        }
+    }
+}
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (ammoAmount.value > 0) {
+        statusbars.getStatusBarAttachedTo(StatusBarKind.Magic, myShip).value += -1
+        specialShoot = spawnEntity(sprites.create(img`
+            . . . . . . c c c . . . . . . . 
+            . . . . . c a a a c . . . . . . 
+            . . . . c a a 1 a a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . c a 1 1 1 a c . . . . . 
+            . . . . . c 1 1 1 c . . . . . . 
+            . . . . . c c 1 c c . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c a c . . . . . . . 
+            . . . . . . c c c . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            . . . . . . . c . . . . . . . . 
+            `, SpriteKind.SpecialAttack), -30)
+        specialShoot.setPosition(myShip.x, myShip.y)
+        music.play(music.melodyPlayable(music.beamUp), music.PlaybackMode.UntilDone)
+        pause(500)
+    }
+})
+sprites.onOverlap(SpriteKind.Attack, SpriteKind.EnemyAttack, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    sprites.destroy(otherSprite)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 function spawnEntities () {
     spawnEnemy()
     spawnAmmo()
-    spawnFood()
+    spawnGasoline()
     if (level >= 2) {
         spawnEnemy2()
     }
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    meuTiro = sprites.createProjectileFromSprite(img`
+    shoot = spawnEntity(sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . 8 8 8 8 8 . . . . . 
@@ -104,23 +104,17 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . 8 a 8 . . . . . . 
         . . . . . . . 8 a 8 . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, myShip, 0, -50)
-    meuTiro.setKind(SpriteKind.tiro)
-    meuTiro.setFlag(SpriteFlag.AutoDestroy, true)
+        `, SpriteKind.Attack), -50)
+    shoot.setPosition(myShip.x, myShip.y)
     pause(200)
 })
-sprites.onOverlap(SpriteKind.tiro, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth, inimigo).value += -1
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
-})
 statusbars.onZero(StatusBarKind.EnemyHealth2, function (status) {
-    sprites.destroy(status.spriteAttachedTo())
+    sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
     info.changeScoreBy(2)
 })
 function enemyFire () {
     for (let value4 of sprites.allOfKind(SpriteKind.Enemy)) {
-        tiro2 = sprites.create(img`
+        enemyShoot = spawnEntity(sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . 2 3 2 . . . . . . 
             . . . . . . . 2 3 2 . . . . . . 
@@ -137,14 +131,12 @@ function enemyFire () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            `, SpriteKind.EnemyAttack)
-        tiro2.setPosition(value4.x, value4.y)
-        tiro2.setVelocity(0, 70)
-        tiro2.setFlag(SpriteFlag.AutoDestroy, true)
+            `, SpriteKind.EnemyAttack), 70)
+        enemyShoot.setPosition(value4.x, value4.y)
     }
 }
 function spawnAmmo () {
-    ammo = sprites.create(img`
+    ammo = spawnEntity(sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -161,13 +153,10 @@ function spawnAmmo () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Ammo)
-    ammo.setPosition(randint(0, scene.screenWidth()), 10)
-    ammo.setVelocity(0, 60)
-    ammo.setFlag(SpriteFlag.AutoDestroy, true)
+        `, SpriteKind.Ammo), 60)
 }
 statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
-    sprites.destroy(status.spriteAttachedTo())
+    sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
     info.changeScoreBy(1)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
@@ -188,7 +177,7 @@ function handleActions () {
 function spawnEnemy2 () {
     pause(200)
     if (randint(0, 10) >= 2) {
-        Inimigo2 = sprites.create(img`
+        enemy2Ship = spawnEntity(sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . 6 . . 6 . . . . . . 
@@ -205,15 +194,11 @@ function spawnEnemy2 () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            `, SpriteKind.Enemy2)
-        posAleatoria2 = randint(0, scene.screenWidth())
-        statusbaren2 = statusbars.create(20, 4, StatusBarKind.EnemyHealth2)
-        statusbaren2.value = 3
-        statusbaren2.max = 3
-        statusbaren2.attachToSprite(Inimigo2, 5, 0)
-        Inimigo2.setPosition(posAleatoria2, 1)
-        Inimigo2.setVelocity(0, 40)
-        Inimigo2.setFlag(SpriteFlag.AutoDestroy, true)
+            `, SpriteKind.Enemy2), 40)
+        enemy2Life = statusbars.create(20, 4, StatusBarKind.EnemyHealth2)
+        enemy2Life.value = 3
+        enemy2Life.max = 3
+        enemy2Life.attachToSprite(enemy2Ship, 5, 0)
     }
 }
 function takeDamage (amount: number) {
@@ -224,9 +209,14 @@ function takeDamage (amount: number) {
         game.gameOver(false)
     }
 }
+sprites.onOverlap(SpriteKind.Attack, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth, enemyShip).value += -1
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 function enemy2Fire () {
     for (let value2 of sprites.allOfKind(SpriteKind.Enemy2)) {
-        tiroini2 = sprites.create(img`
+        enemy2Shoot = spawnEntity(sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . 8 9 8 . . . . . . 
             . . . . . . . 8 9 8 . . . . . . 
@@ -243,16 +233,10 @@ function enemy2Fire () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            `, SpriteKind.Enemy2Attack)
-        tiroini2.setPosition(value2.x, value2.y)
-        tiroini2.setVelocity(0, 70)
-        tiroini2.setFlag(SpriteFlag.AutoDestroy, true)
+            `, SpriteKind.Enemy2Attack), 70)
+        enemy2Shoot.setPosition(value2.x, value2.y)
     }
 }
-sprites.onOverlap(SpriteKind.EnemyAttack, SpriteKind.Player, function (sprite, otherSprite) {
-    sprites.destroy(sprite)
-    takeDamage(1)
-})
 sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.EnemyAttack, function (sprite, otherSprite) {
     sprites.destroy(otherSprite, effects.fire, 500)
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
@@ -261,12 +245,12 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy2, function (sprite, otherS
     takeDamage(2)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy2Attack, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
     takeDamage(2)
 })
-sprites.onOverlap(SpriteKind.tiro, SpriteKind.Enemy2, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth2, otherSprite).value += -1
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+sprites.onOverlap(SpriteKind.Player, SpriteKind.EnemyAttack, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    takeDamage(1)
 })
 function enemy2Move () {
     for (let value3 of sprites.allOfKind(SpriteKind.Enemy2)) {
@@ -282,7 +266,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     if (gasolineAmount.value < gasolineAmount.max) {
         statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, sprite).value += 0.1
     }
-    music.play(music.melodyPlayable(music.beamUp), music.PlaybackMode.UntilDone)
+    music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
 })
 info.onScore(20, function () {
     level += 1
@@ -293,7 +277,7 @@ sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.Enemy2, function (sprite,
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 function spawnEnemy () {
-    inimigo = sprites.create(img`
+    enemyShip = spawnEntity(sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . b . . b . . . . . . 
@@ -310,40 +294,45 @@ function spawnEnemy () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Enemy)
-    posAleatoria = randint(0, scene.screenWidth())
-    statusbar = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
-    statusbar.max = 1
-    statusbar.value = 1
-    statusbar.attachToSprite(inimigo, 5, 0)
-    inimigo.setPosition(posAleatoria, 10)
-    inimigo.setVelocity(0, 40)
-    inimigo.setFlag(SpriteFlag.AutoDestroy, true)
+        `, SpriteKind.Enemy), 40)
+    enemyLife = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
+    enemyLife.max = 1
+    enemyLife.value = 1
+    enemyLife.attachToSprite(enemyShip, 5, 0)
 }
 statusbars.onZero(StatusBarKind.Energy, function (status) {
     game.gameOver(false)
 })
-sprites.onOverlap(SpriteKind.tiro, SpriteKind.EnemyAttack, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
+function spawnEntity (sprite: Sprite, speed: number) {
+    entity = sprite
+    entity.setPosition(randint(0, scene.screenWidth()), 10)
+    entity.setVelocity(0, speed)
+    entity.setFlag(SpriteFlag.AutoDestroy, true)
+    return entity
+}
+sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.Enemy2Attack, function (sprite, otherSprite) {
     sprites.destroy(otherSprite, effects.fire, 500)
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
+sprites.onOverlap(SpriteKind.Attack, SpriteKind.Enemy2, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth2, otherSprite).value += -1
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(otherSprite)
     takeDamage(1)
 })
-let statusbar: StatusBarSprite = null
-let posAleatoria = 0
-let tiroini2: Sprite = null
-let statusbaren2: StatusBarSprite = null
-let posAleatoria2 = 0
-let Inimigo2: Sprite = null
+let entity: Sprite = null
+let enemyLife: StatusBarSprite = null
+let enemy2Shoot: Sprite = null
+let enemy2Life: StatusBarSprite = null
+let enemy2Ship: Sprite = null
 let ammo: Sprite = null
-let tiro2: Sprite = null
-let inimigo: Sprite = null
-let meuTiro: Sprite = null
-let Gasolina: Sprite = null
-let meuTiroEspecial: Sprite = null
+let enemyShoot: Sprite = null
+let shoot: Sprite = null
+let specialShoot: Sprite = null
+let gasoline: Sprite = null
+let enemyShip: Sprite = null
 let level = 0
 let gasolineAmount: StatusBarSprite = null
 let ammoAmount: StatusBarSprite = null
@@ -508,8 +497,5 @@ music.play(music.createSong(hex`0078000408080106001c00010a006400f401640000040000
 game.onUpdateInterval(2000, function () {
     spawnEntities()
     handleActions()
-})
-forever(function () {
-    pause(500)
-    gasolineAmount.value += -0.05
+    gasolineAmount.value += -0.1
 })
