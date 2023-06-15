@@ -118,14 +118,36 @@ sprites.onOverlap(SpriteKind.Attack, SpriteKind.EnemyAttack, function (sprite, o
     sprites.destroy(otherSprite)
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
+function Bossfire23 () {
+    BossShoot = spawnEntity(sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . 8 8 1 8 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 9 9 8 . . . . . 
+        . . . . . . 8 8 9 8 8 . . . . . 
+        . . . . . . . 8 8 8 . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.BossAttack), 40)
+    BossShoot.setPosition(BigBossShip.right, BigBossShip.bottom)
+}
 function spawnEntities () {
     spawnEnemy()
     spawnAmmo()
     spawnGasoline()
     if (level >= 2) {
         spawnEnemy2()
+    } else if (level < 2) {
+        SpawnBigboss()
     }
-    SpawnBigboss()
 }
 sprites.onOverlap(SpriteKind.Attack, SpriteKind.BossAttack, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
@@ -228,6 +250,7 @@ function handleActions () {
         BossMove()
         Bossfire()
         Bossfire22()
+        Bossfire23()
     }
 }
 function spawnEnemy2 () {
@@ -264,18 +287,31 @@ function takeDamage (amount: number) {
         game.gameOver(false)
     }
 }
-info.onScore(0, function () {
-    pause(5000)
-    SpawnBigboss()
-})
+function Bossfire25 () {
+    BossShoot = spawnEntity(sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . 8 8 1 8 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 9 9 8 . . . . . 
+        . . . . . . 8 8 9 8 8 . . . . . 
+        . . . . . . . 8 8 8 . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.BossAttack), 70)
+    BossShoot.setPosition(BigBossShip.x, BigBossShip.y)
+}
 sprites.onOverlap(SpriteKind.Attack, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth, otherSprite).value += -1
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
-})
-info.onScore(36, function () {
-    level += 1
-    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
 })
 function enemy2Fire () {
     for (let value2 of sprites.allOfKind(SpriteKind.Enemy2)) {
@@ -385,6 +421,27 @@ function Bossfire22 () {
         `, SpriteKind.BossAttack), 70)
     BossShoot.setPosition(BigBossShip.left, BigBossShip.bottom)
 }
+function Bossfire24 () {
+    BossShoot = spawnEntity(sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . . 8 9 8 . . . . . . 
+        . . . . . . 8 8 1 8 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 9 9 9 8 . . . . . 
+        . . . . . . 8 8 9 8 8 . . . . . 
+        . . . . . . . 8 8 8 . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.BossAttack), 40)
+    BossShoot.setPosition(BigBossShip.left, BigBossShip.bottom)
+}
 sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.Enemy2, function (sprite, otherSprite) {
     statusbars.getStatusBarAttachedTo(StatusBarKind.EnemyHealth2, otherSprite).value += -3
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
@@ -441,13 +498,13 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSpr
 let entity: Sprite = null
 let enemyLife: StatusBarSprite = null
 let enemyShip: Sprite = null
-let BossShoot: Sprite = null
 let enemy2Shoot: Sprite = null
 let enemy2Life: StatusBarSprite = null
 let enemy2Ship: Sprite = null
 let ammo: Sprite = null
 let enemyShoot: Sprite = null
 let shoot: Sprite = null
+let BossShoot: Sprite = null
 let specialShoot: Sprite = null
 let BossHealth: StatusBarSprite = null
 let BigBossShip: Sprite = null
@@ -620,4 +677,10 @@ game.onUpdateInterval(2000, function () {
 })
 game.onUpdateInterval(1000, function () {
     gasolineAmount.value += -0.05
+})
+game.onUpdateInterval(3000, function () {
+    if (level < 2) {
+        Bossfire24()
+        Bossfire25()
+    }
 })
