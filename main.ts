@@ -51,31 +51,33 @@ function enemyMove () {
     }
 }
 function SpawnBigboss () {
-    if (level < 2) {
-        BigBossShip = spawnEntity(sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . 2 . . 2 . . . . . . 
-            2 . . . 2 2 2 2 2 2 2 2 . . . 2 
-            2 2 2 2 2 f 2 2 2 2 f 2 2 2 2 2 
-            2 2 2 2 2 2 f 2 2 f 2 2 2 2 2 2 
-            2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
-            . 2 2 2 2 f f 2 2 f f 2 2 2 2 . 
-            . 2 2 . 2 2 2 2 2 2 2 2 . 2 2 . 
-            2 2 2 2 . . 2 f f 2 . . 2 2 2 2 
-            . 2 2 . . 2 f 2 2 f 2 . . 2 2 . 
-            . . . . . . 2 2 2 2 . . . . . . 
-            . . . . . . . 2 2 . . . . . . . 
-            . . . . . . . 2 2 . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            `, SpriteKind.Boss), 40)
-        scaling.scaleByPercent(BigBossShip, 100, ScaleDirection.Uniformly, ScaleAnchor.Middle)
-        BossHealth = statusbars.create(60, 4, StatusBarKind.BossHealth)
-        BossHealth.max = 10
-        BossHealth.attachToSprite(BigBossShip, 5, 0)
-        BossHealth.value = 10
-    }
+    BigBossShip = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . 2 . . 2 . . . . . . 
+        2 . . . 2 2 2 2 2 2 2 2 . . . 2 
+        2 2 2 2 2 f 2 2 2 2 f 2 2 2 2 2 
+        2 2 2 2 2 2 f 2 2 f 2 2 2 2 2 2 
+        2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
+        . 2 2 2 2 f f 2 2 f f 2 2 2 2 . 
+        . 2 2 . 2 2 2 2 2 2 2 2 . 2 2 . 
+        2 2 2 2 . . 2 f f 2 . . 2 2 2 2 
+        . 2 2 . . 2 f 2 2 f 2 . . 2 2 . 
+        . . . . . . 2 2 2 2 . . . . . . 
+        . . . . . . . 2 2 . . . . . . . 
+        . . . . . . . 2 2 . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.Boss)
+    BigBossShip.setPosition(randint(0, scene.screenWidth()), 20)
+    BigBossShip.setVelocity(40, 0)
+    BigBossShip.setBounceOnWall(true)
+    scaling.scaleByPercent(BigBossShip, 100, ScaleDirection.Uniformly, ScaleAnchor.Middle)
+    BossHealth = statusbars.create(60, 4, StatusBarKind.BossHealth)
+    BossHealth.max = 10
+    BossHealth.attachToSprite(BigBossShip, 5, 0)
+    BossHealth.value = 10
+    bossSpawned = true
 }
 statusbars.onZero(StatusBarKind.BossHealth, function (status) {
     sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
@@ -140,13 +142,21 @@ function Bossfire23 () {
     BossShoot.setPosition(BigBossShip.right, BigBossShip.bottom)
 }
 function spawnEntities () {
-    spawnEnemy()
-    spawnAmmo()
-    spawnGasoline()
-    if (level >= 2) {
+    if (level == 1) {
+        spawnEnemy()
+        spawnAmmo()
+        spawnGasoline()
+    } else if (level == 2) {
+        spawnEnemy()
+        spawnAmmo()
+        spawnGasoline()
         spawnEnemy2()
-    } else if (level < 2) {
-        SpawnBigboss()
+    } else if (level == 3) {
+        spawnAmmo()
+        spawnGasoline()
+        if (!(bossSpawned)) {
+            SpawnBigboss()
+        }
     }
 }
 sprites.onOverlap(SpriteKind.Attack, SpriteKind.BossAttack, function (sprite, otherSprite) {
@@ -177,11 +187,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         shoot.setPosition(myShip.x, myShip.y)
     })
 })
-function BossMove () {
-    BigBossShip.setVelocity(40, 0)
-    BigBossShip.setPosition(85, 30)
-    BigBossShip.setBounceOnWall(true)
-}
 statusbars.onZero(StatusBarKind.EnemyHealth2, function (status) {
     sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
     info.changeScoreBy(2)
@@ -241,13 +246,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSpr
     music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
 })
 function handleActions () {
-    enemyFire()
-    if (level >= 2) {
+    if (level == 1) {
+        enemyFire()
+    } else if (level == 2) {
+        enemyFire()
+        enemyMove()
         enemy2Move()
         enemy2Fire()
-    }
-    if (level < 2) {
-        BossMove()
+    } else if (level == 3 && bossSpawned) {
         Bossfire()
         Bossfire22()
         Bossfire23()
@@ -282,7 +288,7 @@ function spawnEnemy2 () {
 function takeDamage (amount: number) {
     scene.cameraShake(4, 500)
     music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
-    info.changeLifeBy(amount * -1)
+    info.changeLifeBy(amount * 0)
     if (info.life() == 0) {
         game.gameOver(false)
     }
@@ -391,14 +397,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, sprite).value += 0.2
     }
     music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
-})
-info.onScore(20, function () {
-    level += 1
-    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
-})
-info.onScore(35, function () {
-    level += 1
-    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
 })
 function Bossfire22 () {
     BossShoot = spawnEntity(sprites.create(img`
@@ -509,6 +507,7 @@ let specialShoot: Sprite = null
 let BossHealth: StatusBarSprite = null
 let BigBossShip: Sprite = null
 let gasoline: Sprite = null
+let bossSpawned = false
 let level = 0
 let gasolineAmount: StatusBarSprite = null
 let ammoAmount: StatusBarSprite = null
@@ -666,11 +665,11 @@ scene.setBackgroundImage(img`
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     `)
 effects.starField.startScreenEffect()
+level = 1
+bossSpawned = false
 info.setScore(0)
 info.setLife(3)
-level = 1
 music.play(music.createSong(hex`0078000408080106001c00010a006400f401640000040000000000000000000000000000000002d80000000400012a04000800012a08000c00012510001400012a18001c00012a20002400012224002800012228002c00012530003400012938003c00012940004400012a44004800012a48004c00012250005400012260006400012268006c00012570007400012974007800012a80008400012a84008800012a88008c00012590009400012a98009c00012aa000a4000122a400a8000122a800ac000125b000b4000129b800bc000129c000c400012ac400c800012ac800cc000122d000d4000122e000e4000122e800ec000125f000f4000129f400f800012a`), music.PlaybackMode.LoopingInBackground)
-game.setGameOverScoringType(game.ScoringType.HighScore)
 game.onUpdateInterval(2000, function () {
     spawnEntities()
     handleActions()
@@ -678,8 +677,15 @@ game.onUpdateInterval(2000, function () {
 game.onUpdateInterval(1000, function () {
     gasolineAmount.value += -0.05
 })
+forever(function () {
+    if (info.score() == 5) {
+        level = 2
+    } else if (info.score() == 10) {
+        level = 3
+    }
+})
 game.onUpdateInterval(3000, function () {
-    if (level < 2) {
+    if (level == 3) {
         Bossfire24()
         Bossfire25()
     }
