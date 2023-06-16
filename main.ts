@@ -288,7 +288,7 @@ function spawnEnemy2 () {
 function takeDamage (amount: number) {
     scene.cameraShake(4, 500)
     music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
-    info.changeLifeBy(amount * 0)
+    info.changeLifeBy(amount * -1)
     if (info.life() == 0) {
         game.gameOver(false)
     }
@@ -464,8 +464,8 @@ function spawnEnemy () {
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Enemy), 40)
     enemyLife = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
-    enemyLife.max = 2
-    enemyLife.value = 2
+    enemyLife.max = 1
+    enemyLife.value = 1
     enemyLife.attachToSprite(enemyShip, 5, 0)
 }
 statusbars.onZero(StatusBarKind.Energy, function (status) {
