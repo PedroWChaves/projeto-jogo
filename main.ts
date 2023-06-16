@@ -36,6 +36,10 @@ function spawnGasoline () {
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Food), 80)
 }
+sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.BossAttack, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+})
 sprites.onOverlap(SpriteKind.Attack, SpriteKind.Enemy2Attack, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     sprites.destroy(otherSprite)
@@ -73,14 +77,15 @@ function SpawnBigboss () {
     BigBossShip.setVelocity(40, 0)
     BigBossShip.setBounceOnWall(true)
     scaling.scaleByPercent(BigBossShip, 100, ScaleDirection.Uniformly, ScaleAnchor.Middle)
-    BossHealth = statusbars.create(60, 4, StatusBarKind.BossHealth)
-    BossHealth.max = 10
-    BossHealth.attachToSprite(BigBossShip, 5, 0)
-    BossHealth.value = 10
     bossSpawned = true
+    BossHealth = statusbars.create(60, 4, StatusBarKind.BossHealth)
+    BossHealth.attachToSprite(BigBossShip)
+    BossHealth.value = 10
+    BossHealth.max = 10
 }
 statusbars.onZero(StatusBarKind.BossHealth, function (status) {
     sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
+    pause(1000)
     game.gameOver(true)
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -165,7 +170,7 @@ sprites.onOverlap(SpriteKind.Attack, SpriteKind.BossAttack, function (sprite, ot
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    timer.throttle("action", 200, function () {
+    timer.throttle("action", 300, function () {
         shoot = spawnEntity(sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -190,6 +195,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 statusbars.onZero(StatusBarKind.EnemyHealth2, function (status) {
     sprites.destroy(status.spriteAttachedTo(), effects.fire, 500)
     info.changeScoreBy(2)
+})
+sprites.onOverlap(SpriteKind.SpecialAttack, SpriteKind.Boss, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.fire, 500)
+    statusbars.getStatusBarAttachedTo(StatusBarKind.BossHealth, otherSprite).value += -2
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
 })
 function enemyFire () {
     for (let value4 of sprites.allOfKind(SpriteKind.Enemy)) {
@@ -253,10 +263,6 @@ function handleActions () {
         enemyMove()
         enemy2Move()
         enemy2Fire()
-    } else if (level == 3 && bossSpawned) {
-        Bossfire()
-        Bossfire22()
-        Bossfire23()
     }
 }
 function spawnEnemy2 () {
@@ -671,23 +677,36 @@ info.setScore(0)
 info.setLife(3)
 music.play(music.createSong(hex`0078000408080106001c00010a006400f401640000040000000000000000000000000000000002d80000000400012a04000800012a08000c00012510001400012a18001c00012a20002400012224002800012228002c00012530003400012938003c00012940004400012a44004800012a48004c00012250005400012260006400012268006c00012570007400012974007800012a80008400012a84008800012a88008c00012590009400012a98009c00012aa000a4000122a400a8000122a800ac000125b000b4000129b800bc000129c000c400012ac400c800012ac800cc000122d000d4000122e000e4000122e800ec000125f000f4000129f400f800012a`), music.PlaybackMode.LoopingInBackground)
 game.onUpdateInterval(2000, function () {
+    if (level == 3 && bossSpawned) {
+        Bossfire()
+        Bossfire22()
+        Bossfire23()
+    }
+})
+game.onUpdateInterval(2000, function () {
     spawnEntities()
     handleActions()
 })
 game.onUpdateInterval(1000, function () {
-    gasolineAmount.value += -0.05
+    if (level == 3 && bossSpawned) {
+        Bossfire()
+    }
+})
+game.onUpdateInterval(1000, function () {
+    gasolineAmount.value += -0.075
 })
 forever(function () {
-    if (info.score() == 5 && level < 2) {
+    if (info.score() == 10 && level < 2) {
         level = 2
         music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
-    } else if (info.score() >= 10 && level < 3) {
+    } else if (info.score() >= 20 && level < 3) {
         level = 3
         music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
     }
 })
 game.onUpdateInterval(3000, function () {
-    if (level == 3) {
+    if (level == 3 && bossSpawned) {
+        Bossfire()
         Bossfire24()
         Bossfire25()
     }
