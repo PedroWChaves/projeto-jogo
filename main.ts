@@ -518,8 +518,10 @@ let level = 0
 let gasolineAmount: StatusBarSprite = null
 let ammoAmount: StatusBarSprite = null
 let myShip: Sprite = null
-game.showLongText("\"Aperte Espaço para atirar e use as setas para se mover\"", DialogLayout.Bottom)
-game.showLongText("\"Desvie dos projeteis e naves inimigas, você também pode destruir eles com seus foguetes\"", DialogLayout.Bottom)
+game.showLongText("Use as setas para se mover", DialogLayout.Bottom)
+game.showLongText("Use Espaço para atirar e E para escial", DialogLayout.Bottom)
+game.showLongText("Desvie ou destrua os projeteis e naves inimigas", DialogLayout.Bottom)
+game.showLongText("Colete gasolina para sobreviver", DialogLayout.Bottom)
 myShip = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
